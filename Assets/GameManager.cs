@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,11 +21,27 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    Cell[] board;
+    [HideInInspector] public CellType Turn = CellType.None;
+
+    Cell[] _board;
+    [SerializeField] GamePanel _gamePanel;
+    [SerializeField] UIPanel _uiPanel;
+
+    private void Start()
+    {
+        StartGame();
+    }
+
+    private void StartGame()
+    {
+        Turn = (CellType)Random.Range(1, 3);
+        _gamePanel.StartGame();
+        _uiPanel.StartGame(Turn);
+    }
 
     public void SetCells(List<Cell> cells)
     {
-        board = cells.ToArray();
+        _board = cells.ToArray();
     }
 
     public void AfterTurnChecks()
@@ -35,57 +50,63 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("board full, game over");
         }
-        var status = IsWinning();
+        var status = WhosWinning();
         switch (status)
         {
             case CellType.None:
                 break;
             case CellType.X:
-                Debug.Log("x wins, game over");
-                break;
             case CellType.O:
-                Debug.Log("o wins, game over");
-                break;
+                WinGame(status);
+                return;
             default:
                 break;
         }
+        Turn = Turn == CellType.X ? CellType.O : CellType.X;
+        _uiPanel.ShowTurn(Turn);
     }
 
-    private CellType IsWinning()
+    private void WinGame(CellType status)
+    {
+        Debug.Log($"{status} wins, game over");
+        StartGame();
+    }
+
+    private CellType WhosWinning()
     {
         //row
-        for (int i = 0; i < board.Length; i += 3)
+        for (int i = 0; i < _board.Length; i += 3)
         {
-            if (board[i].CellValue == board[i + 1].CellValue && board[i + 1].CellValue == board[i + 2].CellValue && board[i].CellValue != CellType.None)
+            if (_board[i].CellValue == _board[i + 1].CellValue && _board[i + 1].CellValue == _board[i + 2].CellValue && _board[i].CellValue != CellType.None)
             {
-                return board[i].CellValue;
+                return _board[i].CellValue;
             }
         }
         //column
         for (int i = 0; i < 3; i++)
         {
-            if (board[i].CellValue == board[i + 3].CellValue && board[i + 3].CellValue == board[i + 6].CellValue && board[i].CellValue != CellType.None)
+            if (_board[i].CellValue == _board[i + 3].CellValue && _board[i + 3].CellValue == _board[i + 6].CellValue && _board[i].CellValue != CellType.None)
             {
-                return board[i].CellValue;
+                return _board[i].CellValue;
             }
         }
         //diagonal
-        if (board[0].CellValue == board[4].CellValue && board[4].CellValue == board[8].CellValue && board[0].CellValue != CellType.None)
+        if (_board[0].CellValue == _board[4].CellValue && _board[4].CellValue == _board[8].CellValue && _board[0].CellValue != CellType.None)
         {
-            return board[0].CellValue;
+            return _board[0].CellValue;
         }
-        if (board[2].CellValue == board[4].CellValue && board[4].CellValue == board[6].CellValue && board[2].CellValue != CellType.None)
+        if (_board[2].CellValue == _board[4].CellValue && _board[4].CellValue == _board[6].CellValue && _board[2].CellValue != CellType.None)
         {
-            return board[2].CellValue;
+            return _board[2].CellValue;
         }
         return CellType.None;
     }
 
     bool isFullBoard()
     {
-        for (int i = 0; i < board.Length; i++)
+        for (int i = 0; i < _board.Length; i++)
         {
-            if (board[i].CellValue == CellType.None)
+            if (_board[i].CellValue == CellType.None)
             {
                 return false;
             }

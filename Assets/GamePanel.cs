@@ -5,21 +5,22 @@ using UnityEngine;
 public class GamePanel : MonoBehaviour
 {
     [SerializeField] GameObject _cellPrefab;
+    List<Cell> _cells = new List<Cell>();
 
-    // Start is called before the first frame update
     void Start()
     {
-        List<Cell> cells = new List<Cell>();
         for (int i = 0; i < 9; i++)
         {
-            cells.Add(Instantiate(_cellPrefab, transform).GetComponent<Cell>());
+            _cells.Add(Instantiate(_cellPrefab, transform).GetComponent<Cell>());
         }
-        GameManager.Instance.SetCells(cells);
+        GameManager.Instance.SetCells(_cells);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void StartGame()
     {
-        
+        foreach (var cell in _cells)
+        {
+            cell.Clean();
+        }
     }
 }
